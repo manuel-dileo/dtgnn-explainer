@@ -29,10 +29,10 @@ def main():
     parser.add_argument('--model', type=str, choices=['evolvegcn', 'gcrngru', 'roland'], required=True,
                         help='Choose the model from: [evolvegcn, gcrngru, roland]')
 
-    parser.add_argument('--xai_model', type=str, choices=['gnnexplainer', 'last', 'khop', 'sa', 'ig', 'dummy', 'pg'], required=True,
+   parser.add_argument('--xai_model', type=str, choices=['gnnexplainer', 'last', 'khop', 'sa', 'ig', 'dummy', 'pg'], required=True,
                         help='Choose the XAI model \
-                        [gnnexplainer, last (LastSnapshotExplainer), khop (2-hop temporal subgraph explainer),\
-                        sa (Saliency maps), ig (IntegratedGradients), dummy (random explainer), pg (PGExplainer)')
+                        [gnnexplainer (discrete-time version), last (LastSnapshotExplainer), khop (2-hop temporal neighbors subgraph explainer),\
+                        sa (Saliency maps), ig (IntegratedGradients), dummy (Random explainer), pg (PGExplainer, discrete-time version)')
 
     parser.add_argument('--seed', type=int, help='Random seed', default=1234)
 

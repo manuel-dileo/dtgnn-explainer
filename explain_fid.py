@@ -15,7 +15,7 @@ def write_results(lst, file):
             f.write('%s\n' %items)
         print("File written successfully")
     # close the file
-    f.close()    
+    f.close()
 
 def main():
     warnings.filterwarnings("ignore")
@@ -33,8 +33,8 @@ def main():
 
     parser.add_argument('--xai_model', type=str, choices=['gnnexplainer', 'last', 'khop', 'sa', 'ig', 'dummy', 'pg'], required=True,
                         help='Choose the XAI model \
-                        [gnnexplainer, last (LastSnapshotExplainer), khop (2-hop temporal subgraph explainer),\
-                        sa (Saliency maps), ig (IntegratedGradients), dummy (random explainer), pg (PGExplainer)')
+                        [gnnexplainer (discrete-time version), last (LastSnapshotExplainer), khop (2-hop temporal neighbors subgraph explainer),\
+                        sa (Saliency maps), ig (IntegratedGradients), dummy (Random explainer), pg (PGExplainer, discrete-time version)')
 
     parser.add_argument('--seed', type=int, help='Random seed', default=1234)
 
