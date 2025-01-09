@@ -8,22 +8,22 @@ The supplementary material is available as a pdf in this repo.
 To reproduce our experiments, proceed with the following steps:
 - Create the log directories using the `create_log_dir.sh` script
  ```
-     chmod +x ./create_log_dir.sh
-    ./create_log_dir.sh
+ chmod +x ./create_log_dir.sh
+ ./create_log_dir.sh
  ```
 - Follow the steps in the `Prepare the datasets` section of this README
 - Train the base-models (optional). The weights of the well-trained base-models are already available for all the considered datasets in folder `trained_models`. Hence, it is not necessary to re-train the base-models. However, if you want to do it, simply run
  ```
-     python train.py --dataset ${datasetname} --model ${modelname}
+ python train.py --dataset ${datasetname} --model ${modelname}
  ```
 - Train the explainers and evaluate their temporal fidelity. Simply run:
   ```
-     python explain_fid.py --dataset ${datasetname} --model ${modelname} --xai_model ${xainame}
+  python explain_fid.py --dataset ${datasetname} --model ${modelname} --xai_model ${xainame}
   ```
   where `xai_model` is a choice between ['gnnexplainer', 'last', 'khop', 'sa', 'ig', 'dummy', 'pg']. Check the help for the `--xai_model` option for more information.
 - Train the explainers and evaluate their human readability level (cohesivennes, edge recurrence, reciprocity, homophily). Simply run:
   ```
-     python explain_eval.py --dataset ${datasetname} --model ${modelname} --xai_model ${xainame}
+  python explain_eval.py --dataset ${datasetname} --model ${modelname} --xai_model ${xainame}
   ```
 
 ## Prepare the datasets
