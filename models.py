@@ -152,8 +152,8 @@ class ROLAND(torch.nn.Module):
                 elif update=='mlp':
                     self.updates.append(Linear(hidden_dim*2, hidden_dim))
         self.previous_embeddings = None
-        #self.device = torch.device('cuda')
-        self.device = 'cpu'
+        self.device = torch.device('cuda')
+        #self.device = 'cpu'
                                     
         
     def reset_loss(self,loss=BCEWithLogitsLoss):
@@ -220,8 +220,8 @@ class ROLAND(torch.nn.Module):
                     if explain:
                         h = self.updates[z](h.float(), self.previous_embeddings[z].float())
                     else:
-                        h = h.to(self.device)
-                        self.previous_embeddings[z] = self.previous_embeddings[z].to(self.device)
+                        #h = h.to(self.device)
+                        #self.previous_embeddings[z] = self.previous_embeddings[z].to(self.device)
                         h = torch.Tensor(self.updates[z](h, self.previous_embeddings[z].clone()).detach().cpu().numpy()).to(self.device)
                 elif self.update=='mlp':
                     hin = torch.cat((h,self.previous_embeddings[z].clone()),dim=1)

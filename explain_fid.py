@@ -24,7 +24,7 @@ def main():
     parser = argparse.ArgumentParser(description='Process some parameters.')
 
     # Add --dataset argument with choices
-    parser.add_argument('--dataset', type=str, choices=['bitcoinotc', 'reddit-title'], required=True,
+    parser.add_argument('--dataset', type=str, choices=['bitcoinotc', 'reddit-title','email-eu'], required=True,
                         help='Choose the dataset from: [bitcoinotc, reddit-title]')
 
     # Add --model argument with choices

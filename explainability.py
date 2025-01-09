@@ -736,12 +736,12 @@ def cohesiveness(explanation):
         """
         # Compute node degrees
         num_nodes = max(torch.max(edge_index[0]).item(), torch.max(edge_index[1]).item()) + 1
-        #degrees = torch.zeros(num_nodes, dtype=torch.int32).cuda()
-        degrees = torch.zeros(num_nodes, dtype=torch.int32)
-        #degrees.scatter_add_(0, edge_index[0], torch.ones(edge_index.size(1), dtype=torch.int32).cuda())
-        #degrees.scatter_add_(0, edge_index[1], torch.ones(edge_index.size(1), dtype=torch.int32).cuda())
-        degrees.scatter_add_(0, edge_index[0], torch.ones(edge_index.size(1), dtype=torch.int32))
-        degrees.scatter_add_(0, edge_index[1], torch.ones(edge_index.size(1), dtype=torch.int32))
+        degrees = torch.zeros(num_nodes, dtype=torch.int32).cuda()
+        #degrees = torch.zeros(num_nodes, dtype=torch.int32)
+        degrees.scatter_add_(0, edge_index[0], torch.ones(edge_index.size(1), dtype=torch.int32).cuda())
+        degrees.scatter_add_(0, edge_index[1], torch.ones(edge_index.size(1), dtype=torch.int32).cuda())
+        #degrees.scatter_add_(0, edge_index[0], torch.ones(edge_index.size(1), dtype=torch.int32))
+        #degrees.scatter_add_(0, edge_index[1], torch.ones(edge_index.size(1), dtype=torch.int32))
         # Calculate adjacent edge pairs for each node
         adjacent_edges = torch.sum((degrees * (degrees - 1)) // 2).item()
     

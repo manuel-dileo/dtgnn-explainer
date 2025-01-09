@@ -2,7 +2,7 @@ import argparse
 import torch
 import random
 import numpy as np
-from explainability import eval_pos_explain, explain_eval_fid, eval_pos_homophily
+from explainability import eval_pos_explain, explain_eval_fid
 import warnings
 
 def write_results(lst, file):
@@ -22,7 +22,7 @@ def main():
     parser = argparse.ArgumentParser(description='Process some parameters.')
 
     # Add --dataset argument with choices
-    parser.add_argument('--dataset', type=str, choices=['bitcoinotc', 'reddit-title'], required=True,
+    parser.add_argument('--dataset', type=str, choices=['bitcoinotc', 'reddit-title','email-eu'], required=True,
                         help='Choose the dataset from: [bitcoinotc, reddit-title]')
 
     # Add --model argument with choices
