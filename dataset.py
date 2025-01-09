@@ -7,6 +7,12 @@ from torch_geometric.data import Data
 from datetime import datetime, timedelta
 
 def load_dataset(dataset:str):
+    """
+    Load the dataset as discrete-time temporal networks in PyG.
+    We publish the code to prepare extra well-known datasets (e.g. Enron or Uci-message).
+    To use it, you neeed just to download the right source from public repositories.
+    However, we have not considered them in our paper.
+    """
     if dataset=='bitcoinotc':
         data = BitcoinOTC('dataset/bitcoinotc')
     elif dataset=='reddit-title':

@@ -72,30 +72,8 @@ class PGExplainer(ExplainerAlgorithm):
     r"""The PGExplainer model from the `"Parameterized Explainer for Graph
     Neural Network" <https://arxiv.org/abs/2011.04573>`_ paper.
 
-    Internally, it utilizes a neural network to identify subgraph structures
-    that play a crucial role in the predictions made by a GNN.
-    Importantly, the :class:`PGExplainer` needs to be trained via
-    :meth:`~PGExplainer.train` before being able to generate explanations:
-
-    .. code-block:: python
-
-        explainer = Explainer(
-            model=model,
-            algorithm=PGExplainer(epochs=30, lr=0.003),
-            explanation_type='phenomenon',
-            edge_mask_type='object',
-            model_config=ModelConfig(...),
-        )
-
-        # Train against a variety of node-level or graph-level predictions:
-        for epoch in range(30):
-            for index in [...]:  # Indices to train against.
-                loss = explainer.algorithm.train(epoch, model, x, edge_index,
-                                                 target=target, index=index)
-
-        # Get the final explanations:
-        explanation = explainer(x, edge_index, target=target, index=0)
-
+    Adapted from PyG to work with discrete-time link prediction forecasting.
+    
     Args:
         epochs (int): The number of epochs to train.
         lr (float, optional): The learning rate to apply.
@@ -319,43 +297,7 @@ from torch_geometric.explain.config import MaskType, ModelMode, ModelTaskLevel
 
 
 class EdgeGNNExplainer(ExplainerAlgorithm):
-    r"""The GNN-Explainer model from the `"GNNExplainer: Generating
-    Explanations for Graph Neural Networks"
-    <https://arxiv.org/abs/1903.03894>`_ paper for identifying compact subgraph
-    structures and node features that play a crucial role in the predictions
-    made by a GNN.
-
-    .. note::
-
-        For an example of using :class:`GNNExplainer`, see
-        `examples/explain/gnn_explainer.py <https://github.com/pyg-team/
-        pytorch_geometric/blob/master/examples/explain/gnn_explainer.py>`_,
-        `examples/explain/gnn_explainer_ba_shapes.py <https://github.com/
-        pyg-team/pytorch_geometric/blob/master/examples/
-        explain/gnn_explainer_ba_shapes.py>`_, and `examples/explain/
-        gnn_explainer_link_pred.py <https://github.com/pyg-team/
-        pytorch_geometric/blob/master/examples/explain/gnn_explainer_link_pred.py>`_.
-
-    .. note::
-
-        The :obj:`edge_size` coefficient is multiplied by the number of nodes
-        in the explanation at every iteration, and the resulting value is added
-        to the loss as a regularization term, with the goal of producing
-        compact explanations.
-        A higher value will push the algorithm towards explanations with less
-        elements.
-        Consider adjusting the :obj:`edge_size` coefficient according to the
-        average node degree in the dataset, especially if this value is bigger
-        than in the datasets used in the original paper.
-
-    Args:
-        epochs (int, optional): The number of epochs to train.
-            (default: :obj:`100`)
-        lr (float, optional): The learning rate to apply.
-            (default: :obj:`0.01`)
-        **kwargs (optional): Additional hyper-parameters to override default
-            settings in
-            :attr:`~torch_geometric.explain.algorithm.GNNExplainer.coeffs`.
+    r"""A GNNExplainer model that compute edge_mask for static edges only. Used for testing purpose only.
     """
 
     coeffs = {
@@ -572,21 +514,10 @@ from torch_geometric.explain.config import MaskType, ModelMode, ModelTaskLevel
 class GNNExplainer(ExplainerAlgorithm):
     r"""The GNN-Explainer model from the `"GNNExplainer: Generating
     Explanations for Graph Neural Networks"
-    <https://arxiv.org/abs/1903.03894>`_ paper for identifying compact subgraph
-    structures and node features that play a crucial role in the predictions
-    made by a GNN.
+    <https://arxiv.org/abs/1903.03894>`_ paper.
 
-    .. note::
-
-        For an example of using :class:`GNNExplainer`, see
-        `examples/explain/gnn_explainer.py <https://github.com/pyg-team/
-        pytorch_geometric/blob/master/examples/explain/gnn_explainer.py>`_,
-        `examples/explain/gnn_explainer_ba_shapes.py <https://github.com/
-        pyg-team/pytorch_geometric/blob/master/examples/
-        explain/gnn_explainer_ba_shapes.py>`_, and `examples/explain/
-        gnn_explainer_link_pred.py <https://github.com/pyg-team/
-        pytorch_geometric/blob/master/examples/explain/gnn_explainer_link_pred.py>`_.
-
+    Adapted from PyG to work with discrete-time GNNs and link forecasting.
+    
     .. note::
 
         The :obj:`edge_size` coefficient is multiplied by the number of nodes

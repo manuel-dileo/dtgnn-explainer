@@ -79,6 +79,7 @@ class EvolveGCN(torch.nn.Module):
         return h
 
     def node_embed(self, x, edge_index, node_index):
+        #Method used by PGExplainer to create its input features
         h = self.pre(x.float())
         h = self.evolve(h, edge_index)
         h = F.relu(h)

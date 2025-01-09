@@ -35,6 +35,20 @@ xai_algorithm = {
 }    
 
 def sample_edges_to_explain(test_snapshots, edges_per_snap=50):
+    """
+    Samples target events from a sequence of graph snapshots. The method will sample half existing target events (positive edges) and half non existing ones (negative edges).
+
+    Args:
+        test_snapshots (list): A list of test-set graph snapshots
+        edges_per_snap (int, optional): The number of edges to sample as target events from each snapshot. Defaults to 50.
+
+    Returns:
+        list: A list of graph snapshots, each containing:
+            - `edge_label`: A tensor containing labels for positive and negative edges.
+            - `edge_label_index`: A tensor containing indices for positive and negative edges.
+            - `edge_label_explain`: A tensor of sampled edge indices for explanation.
+            - `target_votes`: A tensor of edge attributes corresponding to the sampled edges.
+    """
     test_datas = []
     for i in range(len(test_snapshots)):
         test_data = copy.deepcopy(test_snapshots[i])
@@ -72,6 +86,9 @@ def sample_edges_to_explain(test_snapshots, edges_per_snap=50):
     return test_datas
 
 def explain_eval_fid(model_str, dataset_str, xai_str, edges_per_snap = 50, time_window_percentage=10, topk=20, device='cpu'):
+    """
+    Train an explainer for a certain base-model and dataset and evaluate the fidelity using the setting described in our paper.
+    """
     
     data = load_dataset(dataset_str)
     model = load_trained_model(model_str, f"trained_models/{model_str.lower()}_{dataset_str.lower()}.pt",\
@@ -109,14 +126,13 @@ def explain_eval_fid(model_str, dataset_str, xai_str, edges_per_snap = 50, time_
     train_data, val_data, test_data = train_val_test_split(data, dataset_str)
     test_explain = sample_edges_to_explain(test_data, edges_per_snap=edges_per_snap)
         
-
     window_snap = int((dataset_split_point[dataset_str]['test_split'] * time_window_percentage) / 100)
 
-    pos_fids = []
     neg_fids = []
-    char_scores = []
     for i in range(len(test_explain)):
         edge_to_explain = copy.deepcopy(test_explain[i])
+        #Candidate events are all the ones in the time window before the target event
+        #The window size is specified using time_window_percentage parameter
         i_current = dataset_split_point[dataset_str]['val_split'] + i
         first_snap = i_current - window_snap if i_current - window_snap >= 0 else 0
         first_snap = 0 if xai_str == 'last' else first_snap
@@ -125,6 +141,7 @@ def explain_eval_fid(model_str, dataset_str, xai_str, edges_per_snap = 50, time_
         candidate_data.edge_index = torch.Tensor([[],[]])
         candidate_data.ts = torch.Tensor([])
         if model_str == 'roland':
+            #If base-model is roland we need to evolve the node embedding snapshot by snapshot
             for j in range(len(snap_to_consider)):
                 snap = copy.deepcopy(snap_to_consider[j])
                 edge_index = snap.edge_index
@@ -138,6 +155,7 @@ def explain_eval_fid(model_str, dataset_str, xai_str, edges_per_snap = 50, time_
                 if j == len(snap_to_consider)-1:
                     candidate_data.x = snap.x.float()
         else:
+            #Otherwise we update the model parameter only through this loop, or the internalized memory for GCRNGRU
             for j in range(len(snap_to_consider)):
                 snap = copy.deepcopy(snap_to_consider[j])
                 edge_index = snap.edge_index
@@ -149,28 +167,6 @@ def explain_eval_fid(model_str, dataset_str, xai_str, edges_per_snap = 50, time_
                         candidate_data.x = torch.ones(snap.num_nodes,1).float()
                     else:
                         candidate_data.x = snap.x.float()
-            """
-            for j in range(len(snap_to_consider)):
-                snap = copy.deepcopy(snap_to_consider[j])
-                edge_index = snap.edge_index
-                ts = torch.Tensor([j for _ in range(len(edge_index[0]))])
-                candidate_data.edge_index = torch.cat([candidate_data.edge_index, edge_index], dim=1)
-                candidate_data.ts = torch.cat([candidate_data.ts, ts])
-                if snap.x is None:
-                    snap.x = torch.ones(snap.num_nodes,1).float()
-                snap.to(device)
-                edge_label_index_fake = torch.Tensor([[0],[0]]).long()
-                edge_label_index_fake.to(device)
-                if j == 0:
-                    _ = model(snap.x, snap.edge_index, edge_label_index_fake)
-                else:
-                    _ = model(snap.x, snap.edge_index, edge_label_index_fake, memory=True)
-                if j == len(snap_to_consider)-1:
-                    if snap.x is None:
-                        candidate_data.x = torch.ones(snap.num_nodes,1).float()
-                    else:
-                        candidate_data.x = snap.x.float()
-            """
 
         edge_to_explain.to(device)
         candidate_data.to(device)
@@ -204,37 +200,16 @@ def explain_eval_fid(model_str, dataset_str, xai_str, edges_per_snap = 50, time_
         execution_time = end-start
         pos_fid_snap = 0
         neg_fid_snap = 0
-        #char_scores = []
-        #cohs = []
         for explanation in explanations:
             explanation.to(device)
-            #pos_fid, neg_fid = fidelity(explainer, explanation)
             _, neg_fid = fidelity(explainer, explanation)
-            #char_score = characterization_score(pos_fid, neg_fid)
             neg_fid_inv = 1-neg_fid #Fidelity sufficiency for tgnn papers
             neg_fid_snap += neg_fid_inv
-            #pos_fid_snap += pos_fid
-            #char_score_snap += char_score
-        #coh = eval_cohesive_explanations(explanations, device=device)
-        #coh_avg = np.mean(coh)
-        #cohs.append(coh_avg)
         neg_fid_snap /= edges_per_snap
-        #pos_fid_snap /= edges_per_snap
-        #pos_fids.append(pos_fid_snap)
         neg_fids.append(neg_fid_snap)
-        #if pos_fid_snap + neg_fid_snap == 0:
-            #char_score_snap = 0
-        #else:
-            #char_score_snap = 2 * pos_fid_snap * neg_fid_snap / (pos_fid_snap + neg_fid_snap)
-
-        #char_scores.append(char_score_snap)
 
         print(f'Test snap {i}\n')
-        #print(f'\t Fidelity+: {pos_fid_snap}')
         print(f'\t Fidelity: {neg_fid_snap}')
-        #print(f'\t Cohesiveness: {coh_avg}')
-        #print(f'\t Spatial Cohesiveness: {coh_sp_avg}')
-        #print(f'\t Characterization score: {char_score_snap}')
 
     return neg_fids, execution_time
 
@@ -271,7 +246,7 @@ def eval_pos_explain(model_str, dataset_str, xai_str, edges_per_snap = 50, time_
     )
 
     train_data, val_data, test_data = train_val_test_split(data, dataset_str)
-    test_explain = sample_pos_edges_to_explain(test_data, edges_per_snap=edges_per_snap) #only pos edges
+    test_explain = sample_pos_edges_to_explain(test_data, edges_per_snap=edges_per_snap) #only positive edges
         
 
     window_snap = int((dataset_split_point[dataset_str]['test_split'] * time_window_percentage) / 100)
@@ -280,7 +255,7 @@ def eval_pos_explain(model_str, dataset_str, xai_str, edges_per_snap = 50, time_
     recs = []
     recips = []
     jaccards = []
-    num_recs = 0
+    num_recs = 0 #We keep track of the number of recurrence and reciprocal edge in the target events.
     num_recips = 0
     for i in range(len(test_explain)):
         edge_to_explain = copy.deepcopy(test_explain[i])
@@ -380,6 +355,9 @@ def eval_pos_explain(model_str, dataset_str, xai_str, edges_per_snap = 50, time_
     return cohs, recs, recips, jaccards, num_recs, num_recips
 
 def eval_homophily(explanation, target, comp_tgraph, device='cpu'):
+    """
+    Compute the temporal common neighbors as defined in the paper for the nodes involved in a certain target event, on its explanatory subgraph.
+    """
     # Create adjacency list from edge_index
     expl_edge_index = explanation.edge_index[:, (explanation.edge_mask > 0)].long()
     if expl_edge_index.numel() == 0:
@@ -476,6 +454,10 @@ def eval_reciprocity(explanation, target, candidate_data, device='cpu'):
         return 1, False
 
 def explain_case_study(model_str, dataset_str, xai_str, time_window_percentage=10, topk=20, device='cpu'):
+    """
+    Methods to obtain explanatory subgraphs and evaluate consensus and authority on the case-study presented in the paper: explainin the decisions behind total distrust in BitcoinOTC.
+    """
+    
     data = load_dataset(dataset_str)
     model = load_trained_model(model_str, f"trained_models/{model_str.lower()}_{dataset_str.lower()}.pt",\
                                dataset_str)
@@ -625,13 +607,16 @@ def case_study_metrics(explanation, device='cpu'):
     # Extract the target source and destination from the target tensor
     source_node = target[0].item()
     destination_node = target[1].item()
-    
+
+    #Metrics for explanation
     consensus = compute_consensus(destination_node, expl_edge_index, expl_votes)
     authority = compute_authority(source_node, expl_edge_index, expl_votes)
 
+    #Metrics for candidate graph (computational graph)
     consensus_candidate = compute_consensus(destination_node, explanation.edge_index, explanation.votes)
     authority_candidate = compute_authority(source_node, explanation.edge_index, explanation.votes)
-
+    
+    #Random network generation and its metrics
     G = to_networkx(Data(edge_index=expl_edge_index))
     G.remove_nodes_from(nx.isolates(G.copy()))
     num_nodes = G.order()
@@ -789,6 +774,10 @@ def load_case_study_edges(dataset_str):
 
 
 def sample_pos_edges_to_explain(test_snapshots, edges_per_snap=50):
+    """
+    Methods equal to sample_edges_to_explain but it samples only positive edges (existing future events). 
+    Useful for human readability evaluation.
+    """
     test_datas = []
     for i in range(len(test_snapshots)):
         test_data = copy.deepcopy(test_snapshots[i])

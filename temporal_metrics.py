@@ -5,6 +5,8 @@ import torch
 
 import numpy as np
 
+#Temporal metrics for dataset statistics.
+
 def compute_edge_recurrency(test_set, train_set):
     def concatenate_edge_indices(snapshots):
         # Initialize an empty list to store the concatenated edge indices
@@ -139,14 +141,6 @@ def compute_structural_homophily(train_set):
             jaccard_similarities.append(jaccard_sim)
         
         return jaccard_similarities
-
-    """
-    jaccards = []
-    for i in range(len(train_set)):
-        snapshots = train_set[:(i+1)]
-        graph = concatenate_edge_indices(snapshots)
-        jaccard = compute_jaccard(graph)
-        jaccards = jaccards + jaccard
-    """
+        
     graph = concatenate_edge_indices(train_set)
     return np.mean(compute_jaccard(train_set[-1].edge_index, graph))
