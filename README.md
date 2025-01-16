@@ -16,6 +16,7 @@ To reproduce our experiments, proceed with the following steps:
  ```
  python train.py --dataset ${datasetname} --model ${modelname}
  ```
+Where the options for `datasetname` are ['bitcoinotc','reddit-title','email-eu'] and for `modelname` are ['evolvegcn','gcrngru','roland'].
 - Train the explainers and evaluate their temporal fidelity. Simply run:
   ```
   python explain_fid.py --dataset ${datasetname} --model ${modelname} --xai_model ${xainame}
