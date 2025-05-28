@@ -1,5 +1,5 @@
 # Explainability framework for discrete-time graph neural networks
-This repository contains the code behind the paper UNDER REVIEW
+This repository contains the code behind the paper "Evaluating explainability techniques on discrete-time graph neural networks", accepted at TMLR.
 
 ## Supplementary Material
 The supplementary material is available as a pdf in this repo.
