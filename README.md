@@ -35,5 +35,22 @@ Where the options for `datasetname` are ['bitcoinotc','reddit-title','email-eu']
 ## Run on your own dataset
 To run the training of the base-models, and the evaluation of the explainability technique on your link prediction task, just simply start from adding a choice with your dataset name in the `--dataset` options. Then, follow the errors the code will generate to add where needed all the options/code to handle your dataset(e.g. the repo has several dispatch tables with keys equals to the dataset names). Keep in mind that a discrete-time temporal network is represented as a list of PyG Data object in chronologic order, each representing a specific snapshot.
 
+## Cite
+If you use the code of this repository for your project or you find the work interesting, please cite the following work:
+
+```bibtex
+﻿@article{
+dileo2025evaluating,
+title={Evaluating explainability techniques on discrete-time graph neural networks},
+author={Manuel Dileo and Matteo Zignani and Sabrina Tiziana Gaito},
+journal={Transactions on Machine Learning Research},
+issn={2835-8856},
+year={2025},
+url={https://openreview.net/forum?id=JzmXo0rfry},
+note={}
+}
+}
+```
+
 ## Contact information
-For any comment, suggestion or question, please do not hesitate to contact me at name dot surname at institute dot nation
+For any comment, suggestion or question, please do not hesitate to contact me at manuel dot dileo at unimi dot it
